@@ -18,6 +18,6 @@ INFO  Created: ~\Documents\GitHub\self\source\_posts\Start.md
 
 这是一个图片
 
-{% image fancybox right clear /images/IMG_1611.jpg 150px 300px "A beautiful sunrise" %}
+{% image fancybox center clear /self/assets/images/IMG_1611.png "A beautiful sunrise" %}
 
 感觉非常好
