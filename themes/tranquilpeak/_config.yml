@@ -130,7 +130,7 @@ toc_title: Table of contents
 # Display thumbnail image of each post on index pages (false: disabled, true: enabled)
 thumbnail_image: true
 # Message displayed after the <!-- more --> comment
-read_more_message: Continue reading
+read_more_message: Read More
 # Message displayed after the <!-- more --> comment or after 300 characters for post with link layout
 go_to_message: Go to the website
 # Your blog cover picture. I STRONGLY recommend you to use a CDN to speed up loading of pages.
