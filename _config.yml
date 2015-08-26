@@ -71,6 +71,7 @@ theme: tranquilpeak
 deploy:
   type: git
   repo: git@github.com:Verten/self.git
+  branch: gh-pages
 
 feed:
     type: atom
