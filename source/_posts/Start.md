@@ -16,4 +16,8 @@ C:\Users\ebinhon\Documents\GitHub\self [master +0 ~1 -0]> hexo new New Start
 INFO  Created: ~\Documents\GitHub\self\source\_posts\Start.md
 ```
 
+这是一个图片
+
+{% image fancybox center clear /self/assets/images/IMG_1611.png "A beautiful sunrise" %}
+
 感觉非常好
