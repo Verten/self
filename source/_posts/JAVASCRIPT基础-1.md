@@ -1,6 +1,6 @@
 title: JAVASCRIPT 基础-1
 date: 2018-09-04 23:38:17
-categories:技术
+categories: 技术
 tags:
 
 - 技术
