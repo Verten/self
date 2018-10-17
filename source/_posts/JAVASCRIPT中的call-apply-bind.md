@@ -58,4 +58,80 @@ args.slice(-1)
 
 ### Function.prototype.apply
 
+MDN 上面是这样定义它的
+
+> func.apply(thisArg, [argsArray])
+
+和 Function.prototype.call 类似，第一个参数是传递给*func*的*this*对象，但后面参数则是*func*的参数数组
+
+```
+Math.max.apply(null, [5, 6, 7, 1]) // 7
+Math.max.apply(undefined, [2, 3, 4, 1]) // 4
+```
+
+Function.prototype.apply 也能够动态的改变*func*中的*this*对象
+
+所以能够使用 call 的地方也能够使用 apply, 唯一需要改变的是把**参数列表**换成**参数数组**
+
+```
+const args = [1, 2, 3, 4]
+Array.prototype.slice.apply(args)
+// 等同于
+args.slice()
+Array.prototype.slice.apply(args, [-1])
+// 等同于
+args.slice(-1)
+```
+
 ### Function.prototype.bind
+
+MDN 上面这样定义它的
+
+> fun.bind(thisArg[, arg1[, arg2[, ...]]])
+
+它的第一个参数是传递给*func*的*this*对象，后面的参数则是传递给*func*的参数列表
+
+```
+const obj = {
+  name: 'Object A',
+  getName: function(){
+    return this.name
+  }
+}
+const unboundGetName = obj.getName
+console.info(unboundGetName()) // this is means window, output is undefined
+
+const boundGetName = unboundGetName.bind(obj)
+console.info(boundGetName()) // this is bind to obj, output is Object A
+```
+
+_bind_ 还有一个比较有意思的用法则是可以使一个函数拥有预设的一些初始参数。
+
+```
+  function addSomeNumber(){
+    return Array.prototype.slice.call(arguments).reduce((acc, value) => acc + value, 0)
+  }
+
+  addSomeNumber(1,2,3,4) // output: 10
+
+  const alwaysAddTen = addSomeNumber.bind(null, 10)
+  alwaysAddTen() // output: 10
+  alwaysAddTen(5, 6, 7, 8, 9) // output: 45
+
+  // 减少方法的参数
+  function addNumber(number1, number2, number3){
+    return number1 + number2 + number3
+  }
+
+  const addNewNumber = addNumber.bind(null, 1, 2)
+  addNewNumber(3) // output: 6
+  addNewNumber(10) // output: 13
+```
+
+从上面的例子可以看到，从*bind*的第二个参数开始，都是传递给*func*的参数，所以我们可以通过*bind*方法，给*func*默认指定一些参数
+
+### 总结
+
+*Function.prototype.call*和*Function.prototype.apply* 属于间接执行某个方法的另一种途径，同时它们拥有改变方法内部的*this*的对象的能力，也就是说，如果我们想改变某个方法内部的*this*的指向，则可以使用*call*或者*apply*。
+
+*Function.prototype.bind*则是直接绑定方法的*this*指向，如果 bind 有两个以上的参数，那么后面的参数则作为方法的初始参数。因为*bind*完之后，方法并没有执行，所以还需要手动调用一次*bind*返回之后的函数
