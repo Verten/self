@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>SELF</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://hh-hb.com/"/>
+  <updated>2018-10-16T16:45:04.171Z</updated>
+  <id>http://hh-hb.com/</id>
+  
+  <author>
+    <name>Bin Hong</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>浏览器缓存</title>
+    <link href="http://hh-hb.com/2018/10/16/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98/"/>
+    <id>http://hh-hb.com/2018/10/16/浏览器缓存/</id>
+    <published>2018-10-15T17:29:02.000Z</published>
+    <updated>2018-10-16T16:45:04.171Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>面试中一个经常被问到的问题。首先缓存有很多种例如 CDN 缓存，数据库缓存，代理服务器缓存，浏览器缓存，这里主要说说<strong>浏览器缓存</strong>。</p><h3 id="什么是浏览器缓存"><a href="#什么是浏览器缓存" class="headerlink" title="什么是浏览器缓存"></a>什么是浏览器缓存</h3><p>简单理解，主要指 http 的缓存——即协议层，应该是浏览器储存了的一些页面资源文件，例如 js，css，图片等等</p><h3 id="浏览器缓存有哪些类别"><a href="#浏览器缓存有哪些类别" class="headerlink" title="浏览器缓存有哪些类别"></a>浏览器缓存有哪些类别</h3><ul><li>强缓存</li><li>协商缓存</li></ul><h3 id="强缓存"><a href="#强缓存" class="headerlink" title="强缓存"></a>强缓存</h3><p>只有当缓存失效，才会去服务端获取新的资源，否则都使用本地缓存。<br>与强缓存相关的属性</p><ul><li>Expries (http/1.0)</li><li>Cache-Control (http/1.1)</li></ul><blockquote><p>Expires: Thu, 10 Nov 2017 08:45:11 GMT</p></blockquote><blockquote><p>Cache-Control: max-age=2592000</p></blockquote><p>Expires 是一个绝对时间，但是如果客户端更改了时间，则会导致计算偏差，从而导致缓存失效。</p><p>Cache-Control 是一个相对时间，表示资源缓存的最大有效时间，在该时间内不需要向服务端发起请求。同时 Cache-Control 能够设置的力度比较细腻。其能够带的值有下面一些：</p><ul><li>max-age：即最大有效时间，在上面的例子中我们可以看到</li><li>no-cache：表示没有缓存，即告诉浏览器该资源并没有设置缓存</li><li>s-maxage：同 max-age，但是仅用于共享缓存，如 CDN 缓存</li><li>public：多用户共享缓存，默认设置</li><li>private：不能够多用户共享，HTTP 认证之后，字段会自动转换成 private。</li></ul><h3 id="协商缓存"><a href="#协商缓存" class="headerlink" title="协商缓存"></a>协商缓存</h3><p>客户端会发起一次请求查询缓存是否过期，如果没有，服务端则返回 304，客户端使用本地缓存，否则服务端直接返回数据。<br>与协商缓存相关的属性</p><ul><li>response header: Last-Modified</li><li>request header: If-Modified-Since</li><li>response header: Etag</li><li>request header: If-None-Match</li></ul><blockquote><p>Last-Modified: Thu, 10 Nov 2015 08:45:11 GMT</p></blockquote><blockquote><p>ETag: W/*5954f167-63c6</p></blockquote><p>Last-Modified 是服务端返回在 response header 中的一个属性，再次请求的时候，客户端会使用 If-Modified-Since 并带上之前的 Last-Modified 的值，服务端则会将 If-Modified-Since 和 Last-Modified 对比，如果相等，则表示没有修改，返回 304，反之则表示修改了，返回 200 状态码和数据。</p><p>ETag 是储存文件的特殊标识，因为 Last-Modified 的缺陷，只能精确到秒级，所以如果在一秒内资源文件多次改变，则 Last-Modified 会失效。ETag 也是服务端返回在 response header 中的一个属性，再次请求的时候，客户端会使用 If-None-Match 并带上之前的 ETag 的值，服务端会将 If-None-Match 和 Etag 进行比较，如果相等表示没有修改，返回 304，反制表示修改了，返回 200 状态码和数据。</p><blockquote><p>Last-Modified 与 ETag 是可以一起使用的，服务器会优先验证 ETag，一致的情况下，才会继续比对 Last-Modified，最后才决定是否返回 304 或者 200</p></blockquote><p>下面有个表格可以直观的看到 http 中和缓存相关的属性</p><table><thead><tr><th>属性名</th><th style="text-align:center">值/示例</th><th style="text-align:center">类型</th><th style="text-align:center">作用</th></tr></thead><tbody><tr><td>Pragma</td><td style="text-align:center">no-cache</td><td style="text-align:center">Response</td><td style="text-align:center">告诉浏览器忽略资源的缓存副本，每次访问都需要去服务器拉取【http1.0中存在的字段，在http1.1已被抛弃，使用Cache-Control替代，但为了做http协议的向下兼容，很多网站依旧会带上这个字段】</td></tr><tr><td>Expires</td><td style="text-align:center">Mon, 15 Aug 2016 03:56:47 GMT</td><td style="text-align:center">Response</td><td style="text-align:center">启用缓存和定义缓存时间。告诉浏览器资源缓存过期时间，如果还没过该时间点则不发请求【http1.0中存在的字段，该字段所定义的缓存时间是相对服务器上的时间而言的，如果客户端上的时间跟服务器上的时间不一致（特别是用户修改了自己电脑的系统时间），那缓存时间可能就没啥意义了。在HTTP 1.1版开始，使用Cache-Control: max-age=秒替代】</td></tr><tr><td>Cache-Control</td><td style="text-align:center">no-cache</td><td style="text-align:center">Response</td><td style="text-align:center">告诉浏览器忽略资源的缓存副本，强制每次请求直接发送给服务器，拉取资源，但不是“不缓存”</td></tr><tr><td></td><td style="text-align:center">no-store</td><td style="text-align:center">Response</td><td style="text-align:center">强制缓存在任何情况下都不要保留任何副本</td></tr><tr><td></td><td style="text-align:center">max-age</td><td style="text-align:center">Response</td><td style="text-align:center">指明缓存副本的有效时长，从请求时间开始到过期时间之间的秒数</td></tr><tr><td></td><td style="text-align:center">public</td><td style="text-align:center">Response</td><td style="text-align:center">任何路径的缓存者（本地缓存、代理服务器），可以无条件的缓存改资源</td></tr><tr><td></td><td style="text-align:center">private</td><td style="text-align:center">Response</td><td style="text-align:center">只针对单个用户或者实体（不同用户、窗口）缓存资源</td></tr><tr><td>Last-Modified</td><td style="text-align:center">Mon, 15 Aug 2016 03:56:47 GMT</td><td style="text-align:center">Response</td><td style="text-align:center">告诉浏览器这个资源最后的修改时间。服务器将资源传递给客户端时，会将资源最后更改的时间以“Last-Modified: GMT”的形式加在实体首部上一起返回给客户端【只能精确到秒级，如果某些文件在1秒钟以内，被修改多次的话，它将不能准确标注文件的修改时间】</td></tr><tr><td>If-Modified-Since</td><td style="text-align:center">Mon, 15 Aug 2016 03:56:47 GMT</td><td style="text-align:center">Request</td><td style="text-align:center">其值为上次响应头的Last-Modified值，再次向web服务器请求时带上头If-Modified-Since。web服务器收到请求后发现有头If-Modified-Since则与被请求资源的最后修改时间进行比对。若最后修改时间较新，说明资源又被改动过，则响应整片资源内容（写在响应消息包体内），包括更新Last-Modified的值，HTTP 200；若最后修改时间较旧，说明资源无新修改，则响应HTTP 304(无需包体，节省浏览)，告知浏览器继续使用所保存的cache</td></tr><tr><td>ETag</td><td style="text-align:center">fd56273325a2114818df4f29a628226d</td><td style="text-align:center">Response</td><td style="text-align:center">告诉浏览器当前资源在服务器的唯一标识符（生成规则又服务器决定）</td></tr><tr><td>If-None-Match</td><td style="text-align:center">fd56273325a2114818df4f29a628226d</td><td style="text-align:center">Request</td><td style="text-align:center">当资源过期时（使用Cache-Control标识的max-age），发现资源具有Etage声明，则再次向web服务器请求时带上头If-None-Match（Etag的值）。web服务器收到请求后发现有头If-None-Match则与被请求资源的相应校验串进行比对，决定返回200或304</td></tr></tbody></table><h3 id="不能缓存的请求"><a href="#不能缓存的请求" class="headerlink" title="不能缓存的请求"></a>不能缓存的请求</h3><ul><li>HTTP信息头中包含Cache-Control:no-cache，pragma:no-cache（HTTP1.0），或Cache-Control:max-age=0等告诉浏览器不用缓存的请求</li><li>需要根据Cookie，认证信息等决定输入内容的动态请求是不能被缓存的</li><li>经过HTTPS安全加密的请求</li><li>POST请求无法被缓存</li><li>HTTP响应头中不包含Last-Modified/Etag，也不包含Cache-Control/Expires的请求无法被缓存</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;缓存&quot;&gt;&lt;a href=&quot;#缓存&quot; class=&quot;headerlink&quot; title=&quot;缓存&quot;&gt;&lt;/a&gt;缓存&lt;/h3&gt;&lt;p&gt;面试中一个经常被问到的问题。首先缓存有很多种例如 CDN 缓存，数据库缓存，代理服务器缓存，浏览器缓存，这里主要说说&lt;strong&gt;浏览器缓
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JAVASCRIPT 中的 call,apply,bind</title>
+    <link href="http://hh-hb.com/2018/09/10/JAVASCRIPT%E4%B8%AD%E7%9A%84call-apply-bind/"/>
+    <id>http://hh-hb.com/2018/09/10/JAVASCRIPT中的call-apply-bind/</id>
+    <published>2018-09-10T15:51:55.000Z</published>
+    <updated>2018-10-17T16:09:13.514Z</updated>
+    
+    <content type="html"><![CDATA[<p>Javascript 中有几个有趣的方法，它们位于 Function 对象原型上面，分别是：</p><ul><li>Function.prototype.call</li><li>Function.prototype.apply</li><li>Function.prototype.bind</li></ul><p>今天我们就说说它们的用法和区别。</p><h3 id="Function-prototype-call"><a href="#Function-prototype-call" class="headerlink" title="Function.prototype.call"></a>Function.prototype.call</h3><p>MDN 上面是这样定义它的</p><blockquote><p>fun.call(thisArg, arg1, arg2, …)</p></blockquote><p>第一个参数是传递给 <em>fun</em> 的 <em>this</em> 对象，后面的参数则是 <em>function</em> 所接受的参数列表</p><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Math.max.call(null, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">1</span>) <span class="comment">// 7</span></span><br><span class="line">Math.max.call(undefined, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">1</span>) <span class="comment">// 4</span></span><br></pre></td></tr></table></figure><p>因为 <em>max</em> 函数不需要 <em>this</em> 对象，所以一个参数可以传递 <em>null</em> 或者 <em>undefined</em></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">helloWorld</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.info(<span class="string">`Hello, My name is: <span class="subst">$&#123;<span class="keyword">this</span>.name&#125;</span>! arguments is: <span class="subst">$&#123;<span class="built_in">Array</span>.prototype.slice.call(<span class="built_in">arguments</span>)&#125;</span>`</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">helloWorld.call(&#123;<span class="attr">name</span>: <span class="string">'bin hong'</span>&#125;) <span class="comment">// Hello, My name is: bin hong! arguments is:</span></span><br><span class="line">helloWorld.call(&#123;<span class="attr">name</span>: <span class="string">'Tome'</span>&#125;, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>) <span class="comment">// Hello, My name is: Tome! arguments is: 1,2,3,4</span></span><br></pre></td></tr></table></figure><p>上面例子可以看得出，我们能够通过使用 <em>call</em> 来动态的指定 <em>function</em> 中的 <em>this</em> 的真正对象。</p><p>上面的例子还能够得知，<em>arguments</em> 这个保留字就是在 <em>function</em> 中拿到参数列表的属性，同时使用 <em>Array</em> 对象原型上面的 <em>slice</em> 方法能够将其转化为数组。</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">const args = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line">Array<span class="selector-class">.prototype</span><span class="selector-class">.slice</span><span class="selector-class">.call</span>(args)</span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line">args.slice()</span><br><span class="line">Array<span class="selector-class">.prototype</span><span class="selector-class">.slice</span><span class="selector-class">.call</span>(args, -<span class="number">1</span>)</span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line">args.slice(-<span class="number">1</span>)</span><br></pre></td></tr></table></figure><p>使用 <em>call</em> 和 <em>apply</em> 来调用 javascript 对象原型方法需要理解其第一个参数 <em>this</em> 的含义，如同上面例子一样，我们一般使用 <em>slice</em> 的方法就是在一个 <em>array</em> 对象上面使用，就是这个 <em>array</em> 就是调用 <em>slice</em> 的 <em>this</em> 对象，所以使用 <em>call</em> 或者 <em>apply</em> 的时候，第一个参数就是 <em>array</em> 对象，就是需要使用 <em>slice</em> 的对象。后续的参数，才是传递给 <em>slice</em> 的参数。</p><h3 id="Function-prototype-apply"><a href="#Function-prototype-apply" class="headerlink" title="Function.prototype.apply"></a>Function.prototype.apply</h3><p>MDN 上面是这样定义它的</p><blockquote><p>func.apply(thisArg, [argsArray])</p></blockquote><p>和 Function.prototype.call 类似，第一个参数是传递给<em>func</em>的<em>this</em>对象，但后面参数则是<em>func</em>的参数数组</p><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Math.max.apply(null, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">1</span>]) <span class="comment">// 7</span></span><br><span class="line">Math.max.apply(undefined, [<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">1</span>]) <span class="comment">// 4</span></span><br></pre></td></tr></table></figure><p>Function.prototype.apply 也能够动态的改变<em>func</em>中的<em>this</em>对象</p><p>所以能够使用 call 的地方也能够使用 apply, 唯一需要改变的是把<strong>参数列表</strong>换成<strong>参数数组</strong></p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">const args = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line">Array<span class="selector-class">.prototype</span><span class="selector-class">.slice</span><span class="selector-class">.apply</span>(args)</span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line">args.slice()</span><br><span class="line">Array<span class="selector-class">.prototype</span><span class="selector-class">.slice</span><span class="selector-class">.apply</span>(args, [-<span class="number">1</span>])</span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line">args.slice(-<span class="number">1</span>)</span><br></pre></td></tr></table></figure><h3 id="Function-prototype-bind"><a href="#Function-prototype-bind" class="headerlink" title="Function.prototype.bind"></a>Function.prototype.bind</h3><p>MDN 上面这样定义它的</p><blockquote><p>fun.bind(thisArg[, arg1[, arg2[, …]]])</p></blockquote><p>它的第一个参数是传递给<em>func</em>的<em>this</em>对象，后面的参数则是传递给<em>func</em>的参数列表</p><figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">const obj = &#123;</span><br><span class="line">  name: <span class="string">'Object A'</span>,</span><br><span class="line">  getName: function()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.name</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">const unboundGetName = obj.getName</span><br><span class="line"><span class="built_in">console</span>.info(unboundGetName()) <span class="regexp">//</span> <span class="keyword">this</span> <span class="keyword">is</span> means <span class="built_in">window</span>, output <span class="keyword">is</span> <span class="literal">undefined</span></span><br><span class="line"></span><br><span class="line">const boundGetName = unboundGetName.bind(obj)</span><br><span class="line"><span class="built_in">console</span>.info(boundGetName()) <span class="regexp">//</span> <span class="keyword">this</span> <span class="keyword">is</span> bind to obj, output <span class="keyword">is</span> Object A</span><br></pre></td></tr></table></figure><p><em>bind</em> 还有一个比较有意思的用法则是可以使一个函数拥有预设的一些初始参数。</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">function addSomeNumber()&#123;</span><br><span class="line">  return Array<span class="selector-class">.prototype</span><span class="selector-class">.slice</span><span class="selector-class">.call</span>(arguments).reduce((acc, value) =&gt; acc + value, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">addSomeNumber</span><span class="params">(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>)</span></span> <span class="comment">// output: 10</span></span><br><span class="line"></span><br><span class="line">const alwaysAddTen = addSomeNumber.bind(null, <span class="number">10</span>)</span><br><span class="line"><span class="function"><span class="title">alwaysAddTen</span><span class="params">()</span></span> <span class="comment">// output: 10</span></span><br><span class="line"><span class="function"><span class="title">alwaysAddTen</span><span class="params">(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>)</span></span> <span class="comment">// output: 45</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 减少方法的参数</span></span><br><span class="line">function addNumber(number1, number2, number3)&#123;</span><br><span class="line">  return number1 + number2 + number3</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">const addNewNumber = addNumber.bind(null, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="function"><span class="title">addNewNumber</span><span class="params">(<span class="number">3</span>)</span></span> <span class="comment">// output: 6</span></span><br><span class="line"><span class="function"><span class="title">addNewNumber</span><span class="params">(<span class="number">10</span>)</span></span> <span class="comment">// output: 13</span></span><br></pre></td></tr></table></figure><p>从上面的例子可以看到，从<em>bind</em>的第二个参数开始，都是传递给<em>func</em>的参数，所以我们可以通过<em>bind</em>方法，给<em>func</em>默认指定一些参数</p><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><em>Function.prototype.call</em>和<em>Function.prototype.apply</em> 属于间接执行某个方法的另一种途径，同时它们拥有改变方法内部的<em>this</em>的对象的能力，也就是说，如果我们想改变某个方法内部的<em>this</em>的指向，则可以使用<em>call</em>或者<em>apply</em>。</p><p><em>Function.prototype.bind</em>则是直接绑定方法的<em>this</em>指向，如果 bind 有两个以上的参数，那么后面的参数则作为方法的初始参数。因为<em>bind</em>完之后，方法并没有执行，所以还需要手动调用一次<em>bind</em>返回之后的函数</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Javascript 中有几个有趣的方法，它们位于 Function 对象原型上面，分别是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Function.prototype.call&lt;/li&gt;
+&lt;li&gt;Function.prototype.apply&lt;/li&gt;
+&lt;li&gt;Function.p
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Webpack 中的 Hot-Module-Replace</title>
+    <link href="http://hh-hb.com/2018/09/06/Webpack%E4%B8%AD%E7%9A%84Hot-Module-Replace/"/>
+    <id>http://hh-hb.com/2018/09/06/Webpack中的Hot-Module-Replace/</id>
+    <published>2018-09-06T15:37:53.000Z</published>
+    <updated>2018-09-06T17:25:19.354Z</updated>
+    
+    <content type="html"><![CDATA[<p>现在前端都是工程化开发，很多成熟的脚手架来帮助我们省掉搭建工程的时间，比如 React Starter Kit，Create-react-app，DVA 等等。<br>但是一些基本知识我们还是需要知道的。</p><p>今天就记录一下 Webpack 在开发过程中经常用到的热加载模块简称 HMR，因为在 webpack 看来，一切皆模块，所以这个模块替换，对它来说是很容易做到的</p><h3 id="如何在开发中开启热替换呢"><a href="#如何在开发中开启热替换呢" class="headerlink" title="如何在开发中开启热替换呢"></a>如何在开发中开启热替换呢</h3><h3 id="使用-webpack-dev-server"><a href="#使用-webpack-dev-server" class="headerlink" title="- 使用 webpack-dev-server"></a>- 使用 webpack-dev-server</h3><p>这种方式简单</p><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">npm install <span class="params">--save-dev</span> webpack-dev-server webpack-cli <span class="string">//</span> 先安装相关依赖</span><br><span class="line"></span><br><span class="line"><span class="string">//</span> webpack.conf.js</span><br><span class="line"><span class="string">...</span></span><br><span class="line">devServer: &#123;</span><br><span class="line">  port: 3000,</span><br><span class="line">  hot: <span class="literal">true</span>, <span class="string">//</span> 启用 webpack 的模块热替换特性</span><br><span class="line">  <span class="keyword">history</span>ApiFallback: <span class="literal">true</span>, <span class="string">//</span> 任意的 404 响应可以提供为 index.html 页面</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>然后通过命令<em>webpack-dev-server –config webpack.conf.js</em>来启动即可</p><h3 id="使用-express，webpack-dev-middleware，webpack-hot-middleware"><a href="#使用-express，webpack-dev-middleware，webpack-hot-middleware" class="headerlink" title="- 使用 express，webpack-dev-middleware，webpack-hot-middleware"></a>- 使用 express，webpack-dev-middleware，webpack-hot-middleware</h3><p>一般这种情况多数用在需要使用 express 来提供 API 的情况</p><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev express webpack webpack-dev-middleware webpack-hot-middleware <span class="comment">// 安装依赖</span></span><br><span class="line"><span class="comment">// devServer.js</span></span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>)</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>)</span><br><span class="line"><span class="keyword">const</span> webpackConfig = <span class="built_in">require</span>(<span class="string">'./webpack.dev.conf'</span>)</span><br><span class="line"><span class="keyword">const</span> compiler = webpack(webpackConfig)</span><br><span class="line"><span class="keyword">const</span> app = express()</span><br><span class="line">app.use(</span><br><span class="line">  devMiddleware(compiler, &#123;</span><br><span class="line">    <span class="comment">// webpack-dev-middleware options</span></span><br><span class="line">    writeToDisk: <span class="literal">true</span>, <span class="comment">//把构建出来的文件写入磁盘</span></span><br><span class="line">    noInfo: <span class="literal">true</span>,</span><br><span class="line">    publicPath: webpackConfig.output.publicPath,</span><br><span class="line">  &#125;),</span><br><span class="line">)</span><br><span class="line">app.use(hotMiddleware(compiler))</span><br><span class="line">app.use(<span class="string">'/'</span>, express.static(process.cwd() + <span class="string">`<span class="subst">$&#123;conf.paths.public&#125;</span>`</span>))</span><br><span class="line">app.get(<span class="string">'*'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">request, response</span>) </span>&#123;</span><br><span class="line">  response.sendFile(path.resolve(process.cwd(), <span class="string">`<span class="subst">$&#123;conf.paths.public&#125;</span>`</span>, <span class="string">'index.html'</span>)) <span class="comment">// 所有请求返回index.html， 等同于上面webpack-dev-server中的historyApiFallback</span></span><br><span class="line">&#125;)</span><br><span class="line">app.listen(<span class="number">3000</span>, <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'app listening on port 3000!'</span>))</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// webpack.dev.conf.js</span></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  ...</span><br><span class="line">  entry: [<span class="string">'webpack-hot-middleware/client'</span>, <span class="string">`index.js`</span>], <span class="comment">// 需要引入middleware中的client</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>就如同上面说的那样，常用的两种 HMR 方式，其实第一种更简单。</p><p>这里还需要说一个 React Hot Loader，它的作用则是增强了 webpack 中的 hot 功能，使得在 replace 之后，react component 中的状态也能够保留，在上面的两种方式的基础上，额外配置：</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev react-hot-loader <span class="comment">// 安装依赖</span></span><br><span class="line"><span class="comment">// .babelrc</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"plugins"</span>: [<span class="string">"react-hot-loader/babel"</span>]</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// webpack.conf.js</span></span><br><span class="line">module<span class="selector-class">.exports</span> = &#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    new webpack.HotModuleReplacementPlugin(),</span><br><span class="line">    ...</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// entry point</span></span><br><span class="line"><span class="function"><span class="title">if</span><span class="params">(module.hot)</span></span>&#123;</span><br><span class="line">  module<span class="selector-class">.hot</span><span class="selector-class">.accept</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>使用 HMR 的功能的时候，如果同时也使用了 Redux 的话，则需要注意，需要重新 replace 的 component 不能创建新的 store 不然就会出现下面的错误</p><blockquote><p>warning.js:10 <provider> does not support changing <code>store</code> on the fly. It is most likely that you see this error because you updated to Redux 2.x and React Redux 2.x which no longer hot reload reducers automatically. See <a href="https://github.com/reactjs/react-redux/releases/tag/v2.0.0" target="_blank" rel="noopener">https://github.com/reactjs/react-redux/releases/tag/v2.0.0</a> for the migration instructions.</provider></p></blockquote><p>即不能对含有 Provider 的组件进行 replace，最佳实践应该是对 Router 或者 Router 的上层组件来进行热加载</p><p>具体的详细配置可以参考<a href="https://blog.csdn.net/dengdengda/article/details/78746208" target="_blank" rel="noopener">例子</a>或者<a href="https://www.npmjs.com/package/react-hot-loader" target="_blank" rel="noopener">官网</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;现在前端都是工程化开发，很多成熟的脚手架来帮助我们省掉搭建工程的时间，比如 React Starter Kit，Create-react-app，DVA 等等。&lt;br&gt;但是一些基本知识我们还是需要知道的。&lt;/p&gt;
+&lt;p&gt;今天就记录一下 Webpack 在开发过程中经常用到的
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JAVASCRIPT 基础-1</title>
+    <link href="http://hh-hb.com/2018/09/04/JAVASCRIPT%E5%9F%BA%E7%A1%80-1/"/>
+    <id>http://hh-hb.com/2018/09/04/JAVASCRIPT基础-1/</id>
+    <published>2018-09-04T15:38:17.000Z</published>
+    <updated>2018-09-04T16:50:38.369Z</updated>
+    
+    <content type="html"><![CDATA[<p>在 javascript 中，最常用的就是 Object 对象了，MDN 中有这么一段话</p><blockquote><p>几乎所有 JavaScript 中的对象都是位于原型链顶端的 Object 的实例。</p></blockquote><h3 id="如何在-javascript-中如何创建一个-Object-对象"><a href="#如何在-javascript-中如何创建一个-Object-对象" class="headerlink" title="如何在 javascript 中如何创建一个 Object 对象"></a>如何在 javascript 中如何创建一个 Object 对象</h3><ul><li><strong>使用字面量</strong></li></ul><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> person = &#123;</span><br><span class="line">  name: <span class="string">'bin hong'</span>,</span><br><span class="line">  age: <span class="number">28</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> home = &#123;&#125; // 创建一个空的object对象</span><br></pre></td></tr></table></figure><ul><li><strong>使用构造函数</strong></li></ul><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Person</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.name = <span class="string">'bing hong'</span></span><br><span class="line">  <span class="keyword">this</span>.age = <span class="number">28</span></span><br><span class="line">  <span class="keyword">let</span> location = <span class="string">'guang dong'</span> <span class="comment">// 没有this关键字则是非成员变量</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> person = <span class="keyword">new</span> Person() <span class="comment">// 使用new关键字</span></span><br><span class="line"><span class="built_in">console</span>.info(person) <span class="comment">// person &#123;name: "bing hong", age: 28&#125;</span></span><br></pre></td></tr></table></figure><ul><li><strong>使用 Object 对象</strong></li></ul><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> person = <span class="keyword">new</span> <span class="built_in">Object</span>()</span><br><span class="line">person.name = <span class="string">'bin hong'</span></span><br><span class="line">person.age = <span class="number">28</span></span><br><span class="line"><span class="built_in">console</span>.info(person) <span class="comment">// &#123;name: "bin hong", age: 28&#125;</span></span><br></pre></td></tr></table></figure><p>常用的就上面三种，当然还有下面几种也是能够创建，但是一般不会这么使用</p><ul><li>使用原型 prototype</li></ul><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Person</span>(<span class="params"></span>)</span>&#123;&#125;</span><br><span class="line">Person.prototype.name = <span class="string">'bin hong'</span></span><br><span class="line">Person.prototype.age = <span class="number">28</span></span><br><span class="line"><span class="keyword">let</span> person = <span class="keyword">new</span> Person()</span><br><span class="line"><span class="built_in">console</span>.info(person) <span class="comment">// Person &#123;&#125;</span></span><br><span class="line"><span class="built_in">console</span>.info(person.name) <span class="comment">// bin hong</span></span><br><span class="line"><span class="built_in">console</span>.info(person.age) <span class="comment">// 28</span></span><br></pre></td></tr></table></figure><p>这里可能有人就会有疑问了，我这个创建出来的 <em>person</em> 明明就是空的。为啥还能拿到<em>name</em>和<em>age</em>属性呢？<br>没错，确实是空的，因为我们把属性设置在了它的原型上面，javascript 中的查找会顺着当前对象-&gt;当前对象的原型-&gt;父类对象-&gt;父类原型这样的一级一级的往上的查找顺序来查找，直到找到为止，找不到则返回 <em>undefined</em></p><p>原型的问题，我们可以放到下一篇来讲。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在 javascript 中，最常用的就是 Object 对象了，MDN 中有这么一段话&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;几乎所有 JavaScript 中的对象都是位于原型链顶端的 Object 的实例。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;如何在
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+      <category term="基础" scheme="http://hh-hb.com/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JAVASCRIPT 基础</title>
+    <link href="http://hh-hb.com/2018/08/20/JAVASCRIPT%E5%9F%BA%E7%A1%80/"/>
+    <id>http://hh-hb.com/2018/08/20/JAVASCRIPT基础/</id>
+    <published>2018-08-20T03:04:15.000Z</published>
+    <updated>2018-09-03T16:39:03.811Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="JAVASCRIPT-中的变量提升"><a href="#JAVASCRIPT-中的变量提升" class="headerlink" title="JAVASCRIPT 中的变量提升"></a>JAVASCRIPT 中的变量提升</h3><p>MDN 中说明</p><blockquote><p>Only declarations are hoisted</p></blockquote><p>所以看看下面的代码</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">console.info(a) <span class="comment">//undefined</span></span><br><span class="line"><span class="selector-tag">var</span> <span class="selector-tag">a</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">a</span> = <span class="number">2</span></span><br><span class="line">console.info(a) <span class="comment">//2</span></span><br><span class="line"><span class="selector-tag">var</span> a</span><br></pre></td></tr></table></figure><p>我们来拆解一下<br>第一种写法等同于</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">console.info(a)</span><br><span class="line"><span class="selector-tag">var</span> a</span><br><span class="line"><span class="selector-tag">a</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure><p>根据变量提升的规则</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">var</span> a</span><br><span class="line">console.info(a)</span><br><span class="line"><span class="selector-tag">a</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure><p>所以，打印出 undefined 也就通俗易懂了</p><p>第二种写法根据变量提升的原则</p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">var</span> a</span><br><span class="line"><span class="selector-tag">a</span> = <span class="number">2</span></span><br><span class="line">console.info(a)</span><br></pre></td></tr></table></figure><p>所以也就打印出 2</p><p>变量提升的规则同样适用于方法声明</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">myFunc() <span class="comment">// Error, myFunc is not a function!</span></span><br><span class="line"><span class="keyword">var</span> myFunc = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.info(<span class="string">'my function'</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">helloWorld() <span class="comment">//Hello World!</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">helloWorld</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.info(<span class="string">'Hello World!'</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">goodMorning</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.info(<span class="string">'Good Morning!'</span>)</span><br><span class="line">&#125;</span><br><span class="line">goodMorning() <span class="comment">// Good Morning!</span></span><br></pre></td></tr></table></figure><p>有时候变量提升会让我们困惑，则可以使用 ES6 新引入的<em>let</em>或者<em>const</em>关键字来声明变量，<em>let</em>和<em>const</em>声明的变量不存在提升</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tmp = <span class="number">2</span> <span class="comment">// ReferenceError: can't access lexical declaration `tmp' before initialization</span></span><br><span class="line"><span class="built_in">console</span>.info(tmp)</span><br><span class="line"><span class="keyword">let</span> tmp</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;JAVASCRIPT-中的变量提升&quot;&gt;&lt;a href=&quot;#JAVASCRIPT-中的变量提升&quot; class=&quot;headerlink&quot; title=&quot;JAVASCRIPT 中的变量提升&quot;&gt;&lt;/a&gt;JAVASCRIPT 中的变量提升&lt;/h3&gt;&lt;p&gt;MDN 中说明&lt;/p
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JAVASCRIPT 中的 Object.defineProperty 方法</title>
+    <link href="http://hh-hb.com/2018/08/18/JAVASCRIPT%E4%B8%AD%E7%9A%84Object-defineProperty%E6%96%B9%E6%B3%95/"/>
+    <id>http://hh-hb.com/2018/08/18/JAVASCRIPT中的Object-defineProperty方法/</id>
+    <published>2018-08-18T15:03:14.000Z</published>
+    <updated>2018-09-03T16:38:21.301Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前对于 Javascript 的的理解一直停留在框架的使用上面，确实也需要理一理 Javascript 的一些基础知识了。<br>本篇就总结下个人理解的 Object 对象上面的 defineProperty 方法。</p><h3 id="defineProperty-方法不在-Object-的原型上面，而是在-Object-对象上面"><a href="#defineProperty-方法不在-Object-的原型上面，而是在-Object-对象上面" class="headerlink" title="defineProperty 方法不在 Object 的原型上面，而是在 Object 对象上面"></a>defineProperty 方法不在 Object 的原型上面，而是在 Object 对象上面</h3><p>这也就意味着，使用它的方式是<em>Object.defineProperty(obj, prop, descriptor)</em></p><h3 id="defineProperty-方法的参数"><a href="#defineProperty-方法的参数" class="headerlink" title="defineProperty 方法的参数"></a>defineProperty 方法的参数</h3><ul><li>第一个参数<em>obj</em><ul><li>需要在其上面定义属性的对象</li></ul></li><li>第二个参数<em>prop</em><ul><li>需要定义的属性名称</li></ul></li><li>第三个参数<em>descriptor</em><ul><li>将要被定义的属性的描述符</li><li>其值为 configurable, writable, enumerable, value, get, set</li></ul></li></ul><h3 id="这里主要说一下第三个参数的作用，描述符"><a href="#这里主要说一下第三个参数的作用，描述符" class="headerlink" title="这里主要说一下第三个参数的作用，描述符"></a>这里主要说一下第三个参数的作用，<strong>描述符</strong></h3><p>描述符分为<strong>数据描述符</strong>和<strong>存取描述符</strong></p><p><strong>两者</strong>都能都如下的可选键值</p><ul><li><p>configurable</p><ul><li>当且仅当该属性的 configurable 为 true 时，该属性<em>描述符</em>才能被改变，同时该属性也能从对应的对象上面删除。<strong>默认为 false</strong></li><li>如果该值为false的话，则试图改变除了writable之外的键值（并且writable也只能从true变为false），都会出错。除非新值和当前值相同。<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">let</span> <span class="string">obj</span> <span class="string">=</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="string">Object.defineProperty(obj,</span> <span class="string">'name'</span><span class="string">,</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  value:</span> <span class="string">'binhong'</span><span class="string">,</span></span><br><span class="line"><span class="attr">  writable:</span> <span class="literal">true</span><span class="string">,</span></span><br><span class="line"><span class="attr">  enumerable:</span> <span class="literal">true</span><span class="string">,</span></span><br><span class="line"><span class="attr">  configurable:</span> <span class="literal">false</span><span class="string">,</span></span><br><span class="line"><span class="string">&#125;)</span> <span class="string">//</span> <span class="string">&#123;name:</span> <span class="string">"binhong"</span><span class="string">&#125;</span></span><br><span class="line"><span class="string">//重新定义</span></span><br><span class="line"><span class="string">Object.defineProperty(obj,</span> <span class="string">'name'</span><span class="string">,</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  value:</span> <span class="string">'binhong'</span><span class="string">,</span></span><br><span class="line"><span class="attr">  writable:</span> <span class="literal">true</span><span class="string">,</span></span><br><span class="line"><span class="attr">  enumerable:</span> <span class="literal">false</span><span class="string">,</span></span><br><span class="line"><span class="attr">  configurable:</span> <span class="literal">false</span><span class="string">,</span></span><br><span class="line"><span class="string">&#125;)</span> <span class="string">//</span> <span class="string">Uncaught</span> <span class="attr">TypeError:</span> <span class="string">Cannot</span> <span class="string">redefine</span> <span class="attr">property:</span> <span class="string">name</span></span><br></pre></td></tr></table></figure></li></ul></li><li><p>enumerable</p><ul><li>决定改属性能否被枚举，即通过<em>for…in</em>或者<em>for…of</em>所遍历。<strong>默认值 false</strong></li></ul><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;&#125;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(obj, <span class="string">'name'</span>, &#123;<span class="attr">value</span>: <span class="string">'binhong'</span>, <span class="attr">writable</span>: <span class="literal">true</span>&#125;) <span class="comment">//&#123;name: "binhong"&#125;</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> o <span class="keyword">in</span> obj)&#123;<span class="built_in">console</span>.info(o)&#125; <span class="comment">// undefined</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(obj, <span class="string">'age'</span>, &#123;<span class="attr">value</span>: <span class="number">28</span>, <span class="attr">writable</span>: <span class="literal">true</span>, <span class="attr">enumerable</span>: <span class="literal">true</span>&#125;) <span class="comment">//&#123;age: 28, name: "binhong"&#125;</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> o <span class="keyword">in</span> obj)&#123;<span class="built_in">console</span>.info(o)&#125; <span class="comment">// age</span></span><br><span class="line"><span class="built_in">Object</span>.keys(obj) <span class="comment">//["age"]</span></span><br></pre></td></tr></table></figure></li></ul><p><strong>数据描述符</strong>还能有下面额外的可选键值</p><ul><li>value<ul><li>该属性的值。可以是任何有效的 javascript 值。<strong>默认为 undefined</strong></li></ul></li><li><p>writable</p><ul><li>当且仅当为 true 的时候，该属性的值才能改变。<strong>默认值为 false</strong></li></ul><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;&#125;</span><br><span class="line">Object.defineProperty(obj, <span class="string">'name'</span>, &#123;value: <span class="string">'binhong'</span>, writable: false&#125;) //&#123;name: <span class="string">"binhong"</span>&#125;</span><br><span class="line">obj.name = <span class="string">'no_name'</span></span><br><span class="line">console.info(obj) // &#123;name: <span class="string">"binhong"</span>&#125;</span><br></pre></td></tr></table></figure></li></ul><p><strong>存取描述符</strong>还能有下面额外的可选键值</p><ul><li>get<ul><li>给需要添加的属性提供 getter 方法。当访问该属性的时候，会调用该方法，方法执行时没有参数传入，但是会有<em>this</em>对象。<strong>默认值为 undefined</strong></li></ul></li><li>set<ul><li>给需要添加的属性提供 setter 方法。当给该属性赋值的时候，会调用该方法，方法执行时传递唯一参数，即改属性的新的值。<strong>默认值为 undefined</strong></li></ul></li></ul><p>下面这张表格列出了数据描述符和存取描述符同时能拥有的键值</p><table><thead><tr><th>-</th><th style="text-align:center">configurable</th><th style="text-align:center">enumerable</th><th style="text-align:center">writable</th><th style="text-align:center">value</th><th style="text-align:center">get</th><th style="text-align:center">set</th></tr></thead><tbody><tr><td>数据描述符</td><td style="text-align:center">Yes</td><td style="text-align:center">Yes</td><td style="text-align:center">Yes</td><td style="text-align:center">Yes</td><td style="text-align:center">No</td><td style="text-align:center">No</td></tr><tr><td>存取描述符</td><td style="text-align:center">Yes</td><td style="text-align:center">Yes</td><td style="text-align:center">No</td><td style="text-align:center">No</td><td style="text-align:center">Yes</td><td style="text-align:center">Yes</td></tr></tbody></table><p><strong>如果一个属性的描述符不具有任意一个value，writable，set和get，那么它将被认为是一个数据描述符。<br>一个描述符如果同时拥有（value或writable）和（get或set），则会产生一个异常。</strong></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> o = &#123;&#125;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(o, <span class="string">'name'</span>, &#123;</span><br><span class="line">  value: <span class="string">'binhong'</span>,</span><br><span class="line">  get: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.name</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">// Uncaught TypeError: Invalid property descriptor. Cannot both specify accessors and a value or writable attribute</span></span><br></pre></td></tr></table></figure><p>下面有两个例子写了基本的<strong>数据描述符</strong>和<strong>存取描述符</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 添加一个数据描述符</span></span><br><span class="line"><span class="keyword">let</span> obj = &#123;&#125;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(obj, <span class="string">'name'</span>, &#123;</span><br><span class="line">  configurable: <span class="literal">true</span>,</span><br><span class="line">  enumerable: <span class="literal">true</span>,</span><br><span class="line">  writable: <span class="literal">true</span>,</span><br><span class="line">  value: <span class="string">'binhong'</span></span><br><span class="line">&#125;) <span class="comment">// &#123;name: "binhong"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//添加一个存取描述符</span></span><br><span class="line"><span class="keyword">let</span> anotherObj = &#123;&#125;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(anotherObj, <span class="string">'name'</span>, &#123;</span><br><span class="line">  configurable: <span class="literal">true</span>,</span><br><span class="line">  enumerable: <span class="literal">true</span>,</span><br><span class="line">  get: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`Hello, my name is: <span class="subst">$&#123;<span class="keyword">this</span>._name&#125;</span>`</span> </span><br><span class="line">  &#125;,</span><br><span class="line">  set: <span class="function"><span class="keyword">function</span>(<span class="params">newValue</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">this</span>._name = newValue <span class="comment">// 使用一个临时变量来存放</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;之前对于 Javascript 的的理解一直停留在框架的使用上面，确实也需要理一理 Javascript 的一些基础知识了。&lt;br&gt;本篇就总结下个人理解的 Object 对象上面的 defineProperty 方法。&lt;/p&gt;
+&lt;h3 id=&quot;defineProperty-
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>前端技术</title>
+    <link href="http://hh-hb.com/2018/08/16/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF/"/>
+    <id>http://hh-hb.com/2018/08/16/前端技术/</id>
+    <published>2018-08-16T08:46:57.000Z</published>
+    <updated>2018-08-18T14:57:02.078Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="React-和-Vue-的区别"><a href="#React-和-Vue-的区别" class="headerlink" title="React 和 Vue 的区别"></a>React 和 Vue 的区别</h3><p>相同点：</p><ul><li>都是属于 UI 层的框架</li><li>都是虚拟 dom</li><li>都有组件化的概念</li><li>两者都支持使用 Typescript 编写</li><li>组件中的数据传递，默认都是单向，如果子组件需要传递属性给父组件，则需要使用 callback 的形式</li></ul><p>不同点：</p><ul><li>页面实现上，Vue 使用模板语法，React 使用 JSX 羽语法，类似于 Vue 使用 v-if 指令来控制元素是否显示，React 则使用{}来控制</li><li>都会使用第三方状态管理组件，但 Vue 使用 Vuex，React 使用 Redux</li><li>学习成本，学习 React 可能首先的需要了解 JSX，ES2015，Vue 则不需要</li></ul><h3 id="React-和-Vue-实现的基本原理和思路"><a href="#React-和-Vue-实现的基本原理和思路" class="headerlink" title="React 和 Vue 实现的基本原理和思路"></a>React 和 Vue 实现的基本原理和思路</h3><ul><li>都动态的进行了数据绑定，从而使用户更加专注于业务层面的开发，而无需太多的关注于页面</li></ul><h3 id="React-中的高阶组件"><a href="#React-中的高阶组件" class="headerlink" title="React 中的高阶组件"></a>React 中的高阶组件</h3><p>基本思路，传入一个组件，返回的也是一个组件，所以可以在该组件的基础上面添加一些属性<br>或者两个组件拥有一些通用的操作，则也可以使用高阶组件<br>react-router 里面的 withRouter 就是一个高阶组件的例子</p><h3 id="Flux-思想的实现有哪些？"><a href="#Flux-思想的实现有哪些？" class="headerlink" title="Flux 思想的实现有哪些？"></a>Flux 思想的实现有哪些？</h3><p>官方介绍：</p><blockquote><p>Flux is the application architecture that Facebook uses for building client-side web applications. It complements React’s composable view components by utilizing a unidirectional data flow. It’s more of a pattern rather than a formal framework, and you can start using Flux immediately without a lot of new code.</p></blockquote><div class="figure fig-100"><a class="fancybox" href="/assets/images/flux.png" title="flux工作流程"><img class="fig-img" src="/assets/images/flux.png" width="" height="" alt="flux工作流程"></a><span class="caption">flux工作流程</span></div><div style="clear:both;"></div><ul><li>Redux 和 Vuex</li><li>数据都是单向流动的，无论在 React 还是在 Vue，这样的一个约束也能够方便定位错误</li></ul><h3 id="Redux-的基本原则和思路"><a href="#Redux-的基本原则和思路" class="headerlink" title="Redux 的基本原则和思路"></a>Redux 的基本原则和思路</h3><ul><li>Redux 主要运用去 React 中，它强调数据是不可变的</li></ul><h3 id="Redux-的中间件-redux-thunk-和-redux-saga-的区别有哪些？"><a href="#Redux-的中间件-redux-thunk-和-redux-saga-的区别有哪些？" class="headerlink" title="Redux 的中间件 redux-thunk 和 redux-saga 的区别有哪些？"></a>Redux 的中间件 redux-thunk 和 redux-saga 的区别有哪些？</h3><ul><li>最主要的区别在于 action 的定义</li><li>redux-thunk 支持定义 action 的时候，不一定要返回一个 JSON Object，可以是一个 Function，这就可以让我们在 action 中直接去发起一个异步请求</li><li>redux-saga 则是 action 依旧返回一个 JSON Object，但是会有一个额外的 saga JS 文件会对该 action 进行监听，所以异步的操作则是在该 saga 中发起请求</li><li>redux-saga 使用的是 ES6 的 generator 函数和 yield 关键字，这也使得写出来的 saga 便于测试</li></ul><h3 id="构建工具-Gulp-和-Webpack-的区别"><a href="#构建工具-Gulp-和-Webpack-的区别" class="headerlink" title="构建工具 Gulp 和 Webpack 的区别"></a>构建工具 Gulp 和 Webpack 的区别</h3><ul><li>Gulp 更加偏向于流式处理</li><li>Webpack 则注重于编译打包</li><li>两者可以相互结合</li></ul><h3 id="Webpack-打包速度过慢，如何解决？"><a href="#Webpack-打包速度过慢，如何解决？" class="headerlink" title="Webpack 打包速度过慢，如何解决？"></a>Webpack 打包速度过慢，如何解决？</h3><ul><li>对于提供了 xxx.min.js 的库，可以配置 externals 来让 webpack 不打包它</li><li>编译阶段 exclude 掉不必要遍历的目录，同样的可以设置 include 和 test</li><li>把不变的公共的依赖打包为 Dll，使用 DllPlugin 和 DllReferencePlugin, 这里需要注意的是需要使用 add-asset-html-webpack-plugin 吧 DllPlugin 生成的 js 引入到 index.html 的 header 去</li><li>增强代码代码压缩工具，把 UglifyJSPlugin 换成 webpack-parallel-uglify-plugin</li><li>设置 alias 和 noPase 属性</li></ul><h3 id="React-diff-算法的基本思路"><a href="#React-diff-算法的基本思路" class="headerlink" title="React diff 算法的基本思路"></a>React diff 算法的基本思路</h3><ul><li>React 的页面渲染是根据页面状态来进行的，即根据 state 来渲染页面</li><li>前后 state 的不同，会导致页面的渲染内容也不同</li><li>diff 比较的基本原则：逐层进行节点比较</li><li>React 对于同一层 dom 的比较，需要依赖 key 来进行，为 dom 元素添加 key 可以加快比较速度</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;React-和-Vue-的区别&quot;&gt;&lt;a href=&quot;#React-和-Vue-的区别&quot; class=&quot;headerlink&quot; title=&quot;React 和 Vue 的区别&quot;&gt;&lt;/a&gt;React 和 Vue 的区别&lt;/h3&gt;&lt;p&gt;相同点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hh-hb.com/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="技术" scheme="http://hh-hb.com/tags/%E6%8A%80%E6%9C%AF/"/>
+    
+      <category term="总结" scheme="http://hh-hb.com/tags/%E6%80%BB%E7%BB%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>三月续</title>
+    <link href="http://hh-hb.com/2016/03/13/%E4%B8%89%E6%9C%88%E7%BB%AD/"/>
+    <id>http://hh-hb.com/2016/03/13/三月续/</id>
+    <published>2016-03-13T11:18:31.000Z</published>
+    <updated>2018-08-15T14:48:12.895Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="不知不觉就已经三月了"><a href="#不知不觉就已经三月了" class="headerlink" title="不知不觉就已经三月了"></a>不知不觉就已经三月了</h3><p>已经每天在努力的准备考研当中</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;不知不觉就已经三月了&quot;&gt;&lt;a href=&quot;#不知不觉就已经三月了&quot; class=&quot;headerlink&quot; title=&quot;不知不觉就已经三月了&quot;&gt;&lt;/a&gt;不知不觉就已经三月了&lt;/h3&gt;&lt;p&gt;已经每天在努力的准备考研当中&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>三月</title>
+    <link href="http://hh-hb.com/2016/03/13/%E4%B8%89%E6%9C%88/"/>
+    <id>http://hh-hb.com/2016/03/13/三月/</id>
+    <published>2016-03-13T11:11:49.000Z</published>
+    <updated>2018-08-15T14:48:12.895Z</updated>
+    
+    <content type="html"><![CDATA[<p>三月来到，炎热还会远嘛？</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;三月来到，炎热还会远嘛？&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>花花</title>
+    <link href="http://hh-hb.com/2016/03/13/%E8%8A%B1%E8%8A%B1/"/>
+    <id>http://hh-hb.com/2016/03/13/花花/</id>
+    <published>2016-03-13T05:04:44.000Z</published>
+    <updated>2018-08-15T14:48:12.905Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="大家好，我是花花窝。我在我电脑上写的第二篇！"><a href="#大家好，我是花花窝。我在我电脑上写的第二篇！" class="headerlink" title="大家好，我是花花窝。我在我电脑上写的第二篇！"></a>大家好，我是花花窝。我在我电脑上写的第二篇！</h4>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;大家好，我是花花窝。我在我电脑上写的第二篇！&quot;&gt;&lt;a href=&quot;#大家好，我是花花窝。我在我电脑上写的第二篇！&quot; class=&quot;headerlink&quot; title=&quot;大家好，我是花花窝。我在我电脑上写的第二篇！&quot;&gt;&lt;/a&gt;大家好，我是花花窝。我在我电脑上写的第二
+      
+    
+    </summary>
+    
+    
+      <category term="花花" scheme="http://hh-hb.com/tags/%E8%8A%B1%E8%8A%B1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>大家好，我是花花</title>
+    <link href="http://hh-hb.com/2016/03/13/%E5%A4%A7%E5%AE%B6%E5%A5%BD%EF%BC%8C%E6%88%91%E6%98%AF%E8%8A%B1%E8%8A%B1/"/>
+    <id>http://hh-hb.com/2016/03/13/大家好，我是花花/</id>
+    <published>2016-03-13T04:53:13.000Z</published>
+    <updated>2018-08-15T14:48:12.899Z</updated>
+    
+    <content type="html"><![CDATA[<p>####大家好！我是花花，我在自己电脑上面发的一篇博客！####</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;####大家好！我是花花，我在自己电脑上面发的一篇博客！####&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="测试" scheme="http://hh-hb.com/tags/%E6%B5%8B%E8%AF%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>归家之旅</title>
+    <link href="http://hh-hb.com/2016/01/05/%E5%BD%92%E5%AE%B6%E4%B9%8B%E6%97%85/"/>
+    <id>http://hh-hb.com/2016/01/05/归家之旅/</id>
+    <published>2016-01-05T11:50:25.000Z</published>
+    <updated>2018-08-15T14:48:12.900Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="懒成虫"><a href="#懒成虫" class="headerlink" title="懒成虫"></a>懒成虫</h5><p>今天不是花花提醒我，我应该又会忘记来写博客。自己想一想，的确是懒成虫了，把花花每天都要逛一逛我的博客的习惯都弄丢了。</p><h5 id="回家"><a href="#回家" class="headerlink" title="回家"></a>回家</h5><p>2016年的元旦，带着花花回老家，一进家门，就被那一记大大的炮竹声给迎接了，想想从10月初我们就计划着买票回老家，到如今的梦想成真。这漫长的等待也是值得了。</p><p>满打满算，2015年12月26号，下午18点33分的火车，广州 -&gt; 九江。提前了大概30分钟上车，这也是我有史以来第一次这么早上火车，拥挤的站台少了那群送别的人。那一刻我也意识到，当返程的时候，我应该也会不舍。不过回家的旅途已经冲散了当时的想法。就这样，带着花花，踏上了归家的旅程。</p><p>一上火车，那个隔间，我们是第一个。于是迫不及待的把前一天晚上买的零食全部拿出来摆在了台面上，仿佛想告诉着别人，“看！我们有辣么多吃的！”，可惜最后发现，对面的竟然是两个扯家常的老大妈。不过这样也好，毕竟会无视了我和花花之间的秀恩爱。</p><p>不知道是兴奋还是太久没坐过火车了，一晚上都没怎么睡着。就期望着感觉带着花花，出现在老家门口。花花第一次坐卧铺，总体表现的还是像一个经常坐火车的人，上车就拖鞋。哈哈哈。</p><p>2015年12月27号，上午08点35分，我们下了火车，走出了站台，还记得奶奶在耳朵边，说的话，“往前走，在马路旁边，有一块钱的公交，直达汽车站”，此时我又想起了，以前汽车站就在火车站对面，过一个地下隧道就到的历史。不过当时我们没有看到有车经过汽车站，想着好好感受一下老家的气温，于是我们就走到汽车站去，耗时20分钟左右。因为当时还没到9点，卖票去九江的人和我说，“最近一班去油墩街的车是9点15的，坐不坐？”这不废话么，“坐！，来两张票子！”“哦，不好意思，9点15的卖完了，下一班10点35分的，坐不坐？”“……坐，两张！”。</p><p>于是我们在汽车站度过了一个小时多的时间，还记得屁股和那个候车室铁板凳的亲密接触的温度。双脚暴露在冷空气里面的感觉，还有那归家的心情。那段时间是漫长的，不过万幸的是，花花，在我身边。</p><p>二线城市，或者应该是三线城市，不完善的候车室和运输系统。都到了10点30分，我们也都没听到广播喊去油墩街的车发车了没有，后来还是我看见一个穿着便装的人在那里喊“油墩街的上车了！”，此时，耳边传来了广播的声音，“去往油墩街的旅客请检票上车”，事后才明白，原来刚刚那个便装的人，便是跟车售票员。不过也算是上车了。</p><p>一个小时半还是快两个小时，依稀记得大概是11点半的样子。我们在油墩街下车了，不过那个是新汽车站，荒凉无比，售票厅的人不知道是不是打麻将去了，只有一个人在那里等。问了一下人才知道去石门街的车还是停在油墩街旧汽车站的，人家指出了怎么走，于是便去老汽车站。</p><p>等了20分钟应该是有的，总算是看到了去石门街的车，心里默默的回忆了下家乡话，便上前去询问。得到的答案是车子应该过20分钟左右走。但是当最后车子发车的时候，已经整整过去了30分钟。加上它走的是传说中的比县道还要县道的，那应该就是乡道了，30多公里的路，它硬是晃了1个小时半多才把我们给送到了家门口。</p><p>于是我们在两点左右，受到了来自家乡的炮竹声的洗礼。</p><h5 id="第一天"><a href="#第一天" class="headerlink" title="第一天"></a>第一天</h5><p>第一天算是12月27号，但是这一天几乎是在车上度过的，老家生活开始的时间算是下午2点半开始。奶奶一直在家等着我们一起吃午饭，吃完然后去小姑父那边走一走，本来是要准备洗澡的，但是最终还是留到了晚上洗，晚上小姑姑还给了花花一件厚厚的棉袄穿，如下图。<br><div class="figure fig-25"><a class="fancybox" href="/assets/images/棉袄花花.jpg" title="棉袄花花"><img class="fig-img" src="/assets/images/棉袄花花.jpg" width="" height="" alt="棉袄花花"></a><span class="caption">棉袄花花</span></div></p><p>然后和奶奶，花花一起，去天台收被子，铺被子。现在想想，那个厚实的棉被盖着，也是极爽的。回来广州盖的那个轻轻的被子和没有盖一样。晚上洗澡，接下来的几天，我的思想斗争一直都是，我不想洗澡，我不想洗澡，我不想洗澡。简直太冷了。脱了衣服，周围的空气都是冻结的。想起了兵哥唱令俊杰的，《冻结》。我还和花花科普了老家特有的“擦澡”，不过没有被她所接受。</p><h5 id="第二天"><a href="#第二天" class="headerlink" title="第二天"></a>第二天</h5><p>12月28号，这一天早晨吃的早餐应该是一位奶奶送过来的米粑，事后几天奶奶也做了，味道鲜美。计划着和花花要不要在广州我们也自己做一次来尝尝看。下午做了什么我还真心记不起来了，这就是太久才来写博客的后果。太多太多的事情细节，都只能靠回忆来写。</p><h5 id="第三天"><a href="#第三天" class="headerlink" title="第三天"></a>第三天</h5><p>12月29号，这天去了山上的寺庙，“黄龙尖庙”，奶奶信佛也已经有10多个年头了，这个寺庙对她老人家来说也是非常熟习的地方了。带着花花整个寺庙走了一圈，除了那个厕所比较简陋以外，其他的建筑已经和我记忆中的有太大的变化了，都说不能抱着有求于菩萨的心态去拜佛，但是我在每一个佛像面前磕头的愿望都是，“奶奶身体健康，家人身体健康，花花天天开心”，因为我还听过一句话，心诚则灵。</p><p>中午我们在寺庙吃的午饭，素菜，也想起了2015年元旦我和花花在衡山师祖殿里面吃的素材。隔餐的莲藕真好吃。</p><p>吃完，用花花的话说，我们要做好事，于是帮庙里的师傅们洗了萝卜，为做萝卜干而准备。最后切萝卜的时候，花花也差点切到自己手指，想想也是挺后怕的，当时指甲都切到了，万幸的是手指没事。花花说“真心是菩萨保佑，感觉是对着手指切下去的，这样都没事情。”<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/花花.jpg" title="花花"><img class="fig-img" src="/assets/images/花花.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/花花1.jpg" title="花花"><img class="fig-img" src="/assets/images/花花1.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/花花和奶奶.jpg" title="奶奶和花花"><img class="fig-img" src="/assets/images/花花和奶奶.jpg" width="" height="" alt="奶奶和花花"></a><span class="caption">奶奶和花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/我和奶奶.jpg" title="奶奶和我"><img class="fig-img" src="/assets/images/我和奶奶.jpg" width="" height="" alt="奶奶和我"></a><span class="caption">奶奶和我</span></div></p><p>下午三点多回到，便开始了挖芋头之旅。<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/芋头.jpg" title="芋头"><img class="fig-img" src="/assets/images/芋头.jpg" width="" height="" alt="芋头"></a><span class="caption">芋头</span></div><div style="clear:both;"></div><br>可惜我的蚯蚓，不然还想钓一下鱼来玩玩，最终因为被奶奶给发现而破灭。</p><h5 id="第四天"><a href="#第四天" class="headerlink" title="第四天"></a>第四天</h5><p>12月30号，这一天也记不起来自己做了什么，不过能感觉到肯定是一种懒懒洋洋的生活，但是返程的不舍也慢慢的涌上心头。</p><h5 id="第五天"><a href="#第五天" class="headerlink" title="第五天"></a>第五天</h5><p>12月31号，2015年的最后一天，最后一天的太阳。<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/lastsun.jpg" title="最后一天的太阳"><img class="fig-img" src="/assets/images/lastsun.jpg" width="" height="" alt="最后一天的太阳"></a><span class="caption">最后一天的太阳</span></div><div style="clear:both;"></div><br>这个是我去天台晒底裤的时候照的，貌似那时候都快9点了。</p><h5 id="第六天"><a href="#第六天" class="headerlink" title="第六天"></a>第六天</h5><p>2016年1月1号，新年的第一天，吃了奶奶包的豆角豆腐米粑，然后去祭拜了下爷爷，逛了下儿时的初中。<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/初中.jpg" title="中学"><img class="fig-img" src="/assets/images/初中.jpg" width="" height="" alt="中学"></a><span class="caption">中学</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/小黑.jpg" title="乱入"><img class="fig-img" src="/assets/images/小黑.jpg" width="" height="" alt="乱入"></a><span class="caption">乱入</span></div></p><h5 id="第七天"><a href="#第七天" class="headerlink" title="第七天"></a>第七天</h5><p>1月2号，这一天返程，6点半的车，8点半到的九江。9点多寄存的行李，本说要去南昌见花花的闺蜜，不过最后还是没有去成，我们便在九江走走逛逛。<br>逛了个麦当劳，这个果然是我们一成不变的食物，还有沃尔玛商城，不过什么都没买，然后是南门湖。<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/湖边合影.jpg" title="自拍"><img class="fig-img" src="/assets/images/湖边合影.jpg" width="" height="" alt="自拍"></a><span class="caption">自拍</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/花花单人.jpg" title="花花"><img class="fig-img" src="/assets/images/花花单人.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/花花单人1.jpg" title="花花"><img class="fig-img" src="/assets/images/花花单人1.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/生肖合影.jpg" title="花花"><img class="fig-img" src="/assets/images/生肖合影.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div><br><div class="figure fig-50"><a class="fancybox" href="/assets/images/学校合影.jpg" title="花花"><img class="fig-img" src="/assets/images/学校合影.jpg" width="" height="" alt="花花"></a><span class="caption">花花</span></div></p><h5 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h5><p>美好的时光总是短暂的，纵然有太多的不舍，但毕竟给我们带来了欢声笑语，期待下次的旅行。<br><div class="figure fig-50"><a class="fancybox" href="/assets/images/结束.jpg" title="路还在"><img class="fig-img" src="/assets/images/结束.jpg" width="" height="" alt="路还在"></a><span class="caption">路还在</span></div></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;懒成虫&quot;&gt;&lt;a href=&quot;#懒成虫&quot; class=&quot;headerlink&quot; title=&quot;懒成虫&quot;&gt;&lt;/a&gt;懒成虫&lt;/h5&gt;&lt;p&gt;今天不是花花提醒我，我应该又会忘记来写博客。自己想一想，的确是懒成虫了，把花花每天都要逛一逛我的博客的习惯都弄丢了。&lt;/p&gt;
+&lt;h5
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="旅行" scheme="http://hh-hb.com/tags/%E6%97%85%E8%A1%8C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>重新开始测试工具之二</title>
+    <link href="http://hh-hb.com/2015/11/15/%E9%87%8D%E6%96%B0%E5%BC%80%E5%A7%8B%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7%E4%B9%8B%E4%BA%8C/"/>
+    <id>http://hh-hb.com/2015/11/15/重新开始测试工具之二/</id>
+    <published>2015-11-15T14:54:23.000Z</published>
+    <updated>2018-08-15T14:48:12.906Z</updated>
+    
+    <content type="html"><![CDATA[<p>上一篇是在笔记本写的，这一遍是在台式电脑写的，如果没问题的话，当着一篇发布的时候，上一篇应该不会被覆盖，这样就表示这个工具的雏形已经完成。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;上一篇是在笔记本写的，这一遍是在台式电脑写的，如果没问题的话，当着一篇发布的时候，上一篇应该不会被覆盖，这样就表示这个工具的雏形已经完成。&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="工具" scheme="http://hh-hb.com/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+      <category term="测试" scheme="http://hh-hb.com/tags/%E6%B5%8B%E8%AF%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>重新开始工具测试</title>
+    <link href="http://hh-hb.com/2015/11/15/%E9%87%8D%E6%96%B0%E5%BC%80%E5%A7%8B%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%95/"/>
+    <id>http://hh-hb.com/2015/11/15/重新开始工具测试/</id>
+    <published>2015-11-15T14:40:28.000Z</published>
+    <updated>2018-08-15T14:48:12.906Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h5><p>这是一篇在我笔记本上面的测试，如果能够发布成功，代表工具没有问题，可以拿去花花的笔记本上面测试了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;测试&quot;&gt;&lt;a href=&quot;#测试&quot; class=&quot;headerlink&quot; title=&quot;测试&quot;&gt;&lt;/a&gt;测试&lt;/h5&gt;&lt;p&gt;这是一篇在我笔记本上面的测试，如果能够发布成功，代表工具没有问题，可以拿去花花的笔记本上面测试了。&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="工具" scheme="http://hh-hb.com/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+      <category term="测试" scheme="http://hh-hb.com/tags/%E6%B5%8B%E8%AF%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>单人的蜗居和周末</title>
+    <link href="http://hh-hb.com/2015/11/15/%E5%8D%95%E4%BA%BA%E7%9A%84%E8%9C%97%E5%B1%85%E5%92%8C%E5%91%A8%E6%9C%AB/"/>
+    <id>http://hh-hb.com/2015/11/15/单人的蜗居和周末/</id>
+    <published>2015-11-15T12:41:57.000Z</published>
+    <updated>2018-08-15T14:48:12.897Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><p>坐在这边想了大半天，然后取了个这个不知道什么鬼的标题 :D</p><h5 id="单居"><a href="#单居" class="headerlink" title="单居"></a>单居</h5><p>花花去上选修了，大白躺在我凳子旁边，而我，则听着那首一剪梅，想着如何来记录一下这短时间所发生的一些事，一些情。<br>首先，终于搬出来了，或多或少都有点不舍，但是这也是一个过程，有了女朋友，养了大白，注定群居的生活不会太过于顺利，为了避免太过于尴尬，<br>于是就搬出来了。本来还想着等着花花毕业再搬的呢。:D</p><p>不过呢，感觉自己一个人住，还是挺爽的，一种安逸的感觉，花花偶尔还能来陪伴下，也不用太在意别人的目光。总体觉得还是不错的。不过大白貌似还是不太适应这边，离楼梯口太近，大白这逗逼胆子也比较小，听到一点动静就会丧心病狂的叫。也不忍心下手抽他，感觉只能顺其自然了，但是看着它还是挺喜欢客厅的那个沙发的，时不时没事就会上去坐坐，不过不能给花花看见，不然抽的就不是大白，而是我了……哈哈哈。</p><p>生活上，这几天都是在忙着搬家，每天下班回来挪一点点东西，记得好像是周三就已经开始进来住了，不过整体的物品还是有所缺少，接着就是添置各种生活用品和电器，洗衣机，电冰箱和饮水机。和花花一起忙活着，有点搬进新家的感觉，哈哈哈。不过这几天也被花花鄙视了，各种木有生活经验，比如，保鲜膜不会用啦，做饭不会并行啦，等等之类的。但是我觉得两个人一起折腾下，生活才有乐趣嘛，不知道花花会不会这么想。:D</p><h5 id="跳棋"><a href="#跳棋" class="headerlink" title="跳棋"></a>跳棋</h5><p>这玩意之所以要单独拿出来说一下，是因为自从开头赢了两局之后，就再也没有赢过了，我表示不服！不过貌似也看不出问题所在啊，莫非这是运气？下次再来战过。</p><h5 id="驾照"><a href="#驾照" class="headerlink" title="驾照"></a>驾照</h5><p>今天终于去练车了，两个人都是第一次，过程比较艰辛，但是当看到花花把车给动起来的那一刻，我表示还是很激动的，毕竟第一次看见花花开车，哈哈哈，整体感觉还是挺好玩的，就是左脚踩着离合有点累。离报名已经过去四个月了，现在才开始练车，进度的确有点慢啊，看来还是得和驾校约的频繁点才行。</p><h5 id="女司机"><a href="#女司机" class="headerlink" title="女司机"></a>女司机</h5><div class="figure fig-100"><a class="fancybox" href="/assets/images/623658141945994548.jpg" title="老司机臭屁花"><img class="fig-img" src="/assets/images/623658141945994548.jpg" width="" height="" alt="老司机臭屁花"></a><span class="caption">老司机臭屁花</span></div>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;标题&quot;&gt;&lt;a href=&quot;#标题&quot; class=&quot;headerlink&quot; title=&quot;标题&quot;&gt;&lt;/a&gt;标题&lt;/h5&gt;&lt;p&gt;坐在这边想了大半天，然后取了个这个不知道什么鬼的标题 :D&lt;/p&gt;
+&lt;h5 id=&quot;单居&quot;&gt;&lt;a href=&quot;#单居&quot; class=&quot;hea
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="情感" scheme="http://hh-hb.com/tags/%E6%83%85%E6%84%9F/"/>
+    
+      <category term="生活" scheme="http://hh-hb.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>二零一五年十月二十二号</title>
+    <link href="http://hh-hb.com/2015/10/22/%E4%BA%8C%E9%9B%B6%E4%B8%80%E4%BA%94%E5%B9%B4%E5%8D%81%E6%9C%88%E4%BA%8C%E5%8D%81%E4%BA%8C%E5%8F%B7/"/>
+    <id>http://hh-hb.com/2015/10/22/二零一五年十月二十二号/</id>
+    <published>2015-10-22T15:25:18.000Z</published>
+    <updated>2018-08-15T14:48:12.896Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h5><p>还记得我第一次看花花的博客，看到第一篇博文的时候，那个标题是“201411011349”，现在看看也差不多一年多了，后来问过她，为啥要这样取标题，<br>然后她告诉我，“因为想了好久，后来担心负能量太多，会写不下去。就随意的弄了个题目糊弄一下大家”。也算是笨的可爱。</p><p>我感觉我现在是想了好久，却不知道想啥题目，感觉愧对高考的104分的语文。只能学花花用个日期来作为博客的标题了。不过换成了汉字的，逼格有所上升。</p><h5 id="忙碌"><a href="#忙碌" class="headerlink" title="忙碌"></a>忙碌</h5><p>记得国庆结束后，忙碌的日子就已经开始了，虽然花花在7月份就说过，“自从回到了学校对面上面，已经习惯了你那么晚下班了”。但还是觉得有点惭愧。让她经历了那么多等待我的时光。但是有些时候生活就是那么不如意的强迫着自己。自己也一直强调着不要把生活和工作混到了一起，感觉花花应该能够体谅我，忙完这一段时间，会好起来的，虽然不能回到以前5点半下班的日子，但是也不会像现在这样，7点半才下班。</p><p>距离上一篇“午夜作死小分队”已经过去了18天了，忙是一方面的原因，懒应该也是更重要的一个原因，回想一下以前八点零五分就要出门走去天桥下面等班车，而现在九点钟才起床。不是懒，还能有其他原因嘛。</p><p>18天过去的太快了，这段时间留给自己的记忆就是加班，反而没有陪花花，想想自己也太惭愧了，我虽然做不到一个百分百用心工作的人，但是我还是想做一个把大多数时间用来陪你的人。</p><h5 id="生病"><a href="#生病" class="headerlink" title="生病"></a>生病</h5><p>应该是上个礼拜十月十二号左右没我鼻子好像过敏了，懂不懂就流鼻涕，然后又特别想打喷嚏。曾一度要发展到咽喉去，又让我想起了当初咽喉咳嗽到我不能说话的日子，索性的是上次看病还剩下几包药，就拿出来冲了，现在也算正常。不过花花叫我去医院看看，但是当时周六，最终还是没有选着去看。</p><p>然后就是前天，从姑姑家回来，路上就觉得花花不太对劲了，一直流鼻涕，当时就觉得有问题，但是对免疫系统太过于自信了，从而导致疏忽了最佳预防时间。随之而来的就是被告知花花已经感冒，而且还不轻。顶着流鼻涕的幸苦，还要帮人兼职。心里说不出的滋味。每次看到花花不舒服，就很想让那些病痛到自己身上来，想想应该也不会有人愿意看着自己的人饱受折磨。</p><p>花花一向排斥吃药，的确吃药不好，但是为了能让花花痛苦的时间少点，我那晚还是买了一盒白加黑给她，希望花花能快点好起来，还我一个生龙活虎的花花。</p><h5 id="反思"><a href="#反思" class="headerlink" title="反思"></a>反思</h5><p>不知道为啥花花突然哭了，但是我知道我肯定做错了什么，或许是没有在生病的时候给到好好的照顾和安慰，只知道一味的叫嚷着吃药。不知道反思的对不对，只希望自己下次能够早点意识到，而不是事后的反思。</p><p>乱七八糟的不知道记录了什么，但是也是目前自己脑子想的东西。还有，最后想说，</p><p><em>花花快快好起来，我爱你，臭屁花</em></p><div class="figure fig-100"><a class="fancybox" href="/assets/images/855343028712172124.jpg" title="思重格的臭屁花"><img class="fig-img" src="/assets/images/855343028712172124.jpg" width="" height="" alt="思重格的臭屁花"></a><span class="caption">思重格的臭屁花</span></div>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;标题&quot;&gt;&lt;a href=&quot;#标题&quot; class=&quot;headerlink&quot; title=&quot;标题&quot;&gt;&lt;/a&gt;标题&lt;/h5&gt;&lt;p&gt;还记得我第一次看花花的博客，看到第一篇博文的时候，那个标题是“201411011349”，现在看看也差不多一年多了，后来问过她，为啥要这样取
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="心情" scheme="http://hh-hb.com/tags/%E5%BF%83%E6%83%85/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>午夜作死小分队</title>
+    <link href="http://hh-hb.com/2015/10/08/%E5%8D%88%E5%A4%9C%E4%BD%9C%E6%AD%BB%E5%B0%8F%E5%88%86%E9%98%9F/"/>
+    <id>http://hh-hb.com/2015/10/08/午夜作死小分队/</id>
+    <published>2015-10-08T12:00:49.000Z</published>
+    <updated>2018-08-15T14:48:12.897Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="骑行"><a href="#骑行" class="headerlink" title="骑行"></a>骑行</h5><p>去年国庆的时候，我们已经在海南爽翻天了，而如今却组织不起大家来。略有惭愧。也不能宅个七天，所以最后还是叫到了锐总出来一起耍。计划踩个三天两夜。</p><h5 id="作死"><a href="#作死" class="headerlink" title="作死"></a>作死</h5><p>但是我们却计划晚上出发，这的确是个作死的决定，不过事后想想，晚上夜骑还真的是很舒服，除了那个该死的105国道广州到从化全程在修路。还有后半段无耻的没有路灯，就这几点比较丧心病狂，其他还好。</p><h5 id="台风"><a href="#台风" class="headerlink" title="台风"></a>台风</h5><p>早就已经看到新闻说有台风，但是我们应该是宅怕了，所以怎么样也想着出去，一路偶尔会下着小雨，然后我们就避雨，没雨，我们就继续。锐总说，趁着天气好，我们多走点，于是目的地从最早的太和镇，变成了钟落潭镇，然后是太平镇，接着是神岗镇，最后就莫名其妙的到从化了，已经是午夜2点。</p><h5 id="溪头村"><a href="#溪头村" class="headerlink" title="溪头村"></a>溪头村</h5><p>此时离我们的目的地，溪头村还有45公里，已经感觉不到屁股的存在了，于是也就只能放弃继续前行，从而找一个酒店住下。怎么说溪头村和花花去过嘛，这波不亏！</p><h5 id="返程"><a href="#返程" class="headerlink" title="返程"></a>返程</h5><p>第二天睡到12点，因为已经知道不可能在去溪头村了，因为累，加上外面下着小雨。然后也验证了花花说的话，沿着我走的路，往死里下，不过这次是返程。因为雨不停，我们也不能一路避雨，这样我们就永远都回不到了，只能冒雨前行。略显凄惨，不过谁叫当初自己要出来呢。想想去年锐总没和我们一起去海南，这次带他淋淋雨也是极好的。</p><div class="figure fig-50"><a class="fancybox" href="/assets/images/350021856091299.jpg" title="麦当劳休整"><img class="fig-img" src="/assets/images/350021856091299.jpg" width="" height="" alt="麦当劳休整"></a><span class="caption">麦当劳休整</span></div><div class="figure fig-50"><a class="fancybox" href="/assets/images/862871816032925511.jpg" title="抵达从化"><img class="fig-img" src="/assets/images/862871816032925511.jpg" width="" height="" alt="抵达从化"></a><span class="caption">抵达从化</span></div><div class="figure fig-100"><a class="fancybox" href="/assets/images/11040087689595285.jpg" title="麦当劳休整"><img class="fig-img" src="/assets/images/11040087689595285.jpg" width="" height="" alt="麦当劳休整"></a><span class="caption">麦当劳休整</span></div><div style="clear:both;"></div><div class="figure fig-100"><a class="fancybox" href="/assets/images/691713449980352153.jpg" title="7天"><img class="fig-img" src="/assets/images/691713449980352153.jpg" width="" height="" alt="7天"></a><span class="caption">7天</span></div><div style="clear:both;"></div><div class="figure fig-100"><a class="fancybox" href="/assets/images/784503392407159218.jpg" title="统计"><img class="fig-img" src="/assets/images/784503392407159218.jpg" width="" height="" alt="统计"></a><span class="caption">统计</span></div><div style="clear:both;"></div><p><em>总计行程100多公里，又体验了一次雨中骑车的感觉，现在单车还在锐总哪里，不知道有没有淋坏，下次还是不能太浪，明知有雨，还要骑行，这也是所谓的装个逼不容易…</em></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;骑行&quot;&gt;&lt;a href=&quot;#骑行&quot; class=&quot;headerlink&quot; title=&quot;骑行&quot;&gt;&lt;/a&gt;骑行&lt;/h5&gt;&lt;p&gt;去年国庆的时候，我们已经在海南爽翻天了，而如今却组织不起大家来。略有惭愧。也不能宅个七天，所以最后还是叫到了锐总出来一起耍。计划踩个三天两夜
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="骑行" scheme="http://hh-hb.com/tags/%E9%AA%91%E8%A1%8C/"/>
+    
+      <category term="旅游" scheme="http://hh-hb.com/tags/%E6%97%85%E6%B8%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>奔波的周末</title>
+    <link href="http://hh-hb.com/2015/09/29/%E5%A5%94%E6%B3%A2%E7%9A%84%E5%91%A8%E6%9C%AB/"/>
+    <id>http://hh-hb.com/2015/09/29/奔波的周末/</id>
+    <published>2015-09-28T16:21:30.000Z</published>
+    <updated>2018-08-15T14:48:12.900Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="周末"><a href="#周末" class="headerlink" title="周末"></a>周末</h5><p>又体验了一把走亲戚的感觉，从我妈到花花姐，这个周末是汗都没停过啊。</p><h5 id="周六"><a href="#周六" class="headerlink" title="周六"></a>周六</h5><p>周六，去到久违的华碧，和老妈子提前过了一个中秋。然后顺带还帮忙在烈日下油了一次锈锈的铁床。晚上11点多回到学校。一个字，撑</p><h5 id="周日"><a href="#周日" class="headerlink" title="周日"></a>周日</h5><p>周日去到花花姐姐那边，肚子里面仿佛还带着周六没有消化完的食物就过去了，帮忙去超市拎了两桶油回去。接着就是开始和姐夫喝酒和吃大餐。喝的有点醉晕晕的，但是也没有忘记花花那救命的一口酒，不然，有可能我真的吐在饭桌上面了。真的是太撑了。下午睡了一觉，不知不觉就五点了，所以还是在姐姐家蹭了一顿晚饭。一个字，撑。</p><h5 id="周一"><a href="#周一" class="headerlink" title="周一"></a>周一</h5><p>本来因为这个周末在两边都吃了大鱼大肉，想着上班能够清淡点，吃个素菜之类的，不过周一竟然是大姑父的生日，所以一顿美食是不可避免的了，早早下班，花花带着大白，慢慢悠悠的晃过去吃个晚饭，不过汗也是没听过啊。各种水果，蛋糕，真的感觉胃撑大了，不知道要经历过怎么样的饿才能过让它小下来了。。。周一也是一个字，撑。</p><h5 id="令人不开心的疼痛"><a href="#令人不开心的疼痛" class="headerlink" title="令人不开心的疼痛"></a>令人不开心的疼痛</h5><p>老样子的疼痛又来了，我的心也是疼痛着，只能在心里默默的念着，时间快点过，抱抱不疼不疼。</p><p><em>抱抱不疼…</em></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;周末&quot;&gt;&lt;a href=&quot;#周末&quot; class=&quot;headerlink&quot; title=&quot;周末&quot;&gt;&lt;/a&gt;周末&lt;/h5&gt;&lt;p&gt;又体验了一把走亲戚的感觉，从我妈到花花姐，这个周末是汗都没停过啊。&lt;/p&gt;
+&lt;h5 id=&quot;周六&quot;&gt;&lt;a href=&quot;#周六&quot; class=
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="奔波" scheme="http://hh-hb.com/tags/%E5%A5%94%E6%B3%A2/"/>
+    
+      <category term="周末" scheme="http://hh-hb.com/tags/%E5%91%A8%E6%9C%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>测试第三篇</title>
+    <link href="http://hh-hb.com/2015/09/24/%E6%B5%8B%E8%AF%95%E7%AC%AC%E4%B8%89%E7%AF%87/"/>
+    <id>http://hh-hb.com/2015/09/24/测试第三篇/</id>
+    <published>2015-09-23T16:11:42.000Z</published>
+    <updated>2018-08-15T14:48:12.902Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="第三篇"><a href="#第三篇" class="headerlink" title="第三篇"></a>第三篇</h5><p>用工具写的第三篇，在花花电脑上面出现了点问题，感觉应该是命令路径的问题，不过已经解决。</p><h5 id="学习"><a href="#学习" class="headerlink" title="学习"></a>学习</h5><p>今晚木有学习，但是也去教室坐了一下。就是想腻着花花。</p><h5 id="计划"><a href="#计划" class="headerlink" title="计划"></a>计划</h5><p>下一步的计划是把这个工具的前端页面给完善了，怎么说也要能够提供上传图片功能嘛，对不对。<br>中秋花花应该要回去姑姑那边，我想她和我一起去华碧一起吃个饭之类的嘛，不过也怕花花放不开。到时候在详谈。<br>中午计划回来吃个午饭，再热，也阻挡不了我要陪你的心！</p><p><em>花花快快开心起来~~~</em></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;第三篇&quot;&gt;&lt;a href=&quot;#第三篇&quot; class=&quot;headerlink&quot; title=&quot;第三篇&quot;&gt;&lt;/a&gt;第三篇&lt;/h5&gt;&lt;p&gt;用工具写的第三篇，在花花电脑上面出现了点问题，感觉应该是命令路径的问题，不过已经解决。&lt;/p&gt;
+&lt;h5 id=&quot;学习&quot;&gt;&lt;a hre
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="心情" scheme="http://hh-hb.com/tags/%E5%BF%83%E6%83%85/"/>
+    
+      <category term="工具" scheme="http://hh-hb.com/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>发布工具第二篇</title>
+    <link href="http://hh-hb.com/2015/09/22/%E5%8F%91%E5%B8%83%E5%B7%A5%E5%85%B7%E7%AC%AC%E4%BA%8C%E7%AF%87/"/>
+    <id>http://hh-hb.com/2015/09/22/发布工具第二篇/</id>
+    <published>2015-09-22T15:50:35.000Z</published>
+    <updated>2018-08-15T14:48:12.899Z</updated>
+    
+    <content type="html"><![CDATA[<h5 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h5><p>小心翼翼的写着这一篇文章，生怕有点错字还是啥的，毕竟目前功能比较少，没有提供修改，咦，不对，貌似内容能够修改，但是标题和标签就不能了。</p><h5 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h5><p>目前还没有提供格式的输入，我都是靠着自己记忆的语法来打字的，感觉应该是要在前台页面上面花点功夫了。初步计划是还在构思当中。</p><h5 id="柚子"><a href="#柚子" class="headerlink" title="柚子"></a>柚子</h5><p>今晚买了个柚子给花花吃，感觉自己都很惭愧，说了这么久。当然，我肯定也吃了一部分，现在桌子上面还有一小部分，我准备等会发布完就去吃了它。</p><h5 id="学习"><a href="#学习" class="headerlink" title="学习"></a>学习</h5><p>今晚呢，本来是要去学习的，但是花花有点事情，所以导致木有过去学习，因为我一个人的确不想去学习嘛，感觉好凄凉的样子，当然，这肯定不是怪花花！</p><h5 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h5><p>这界面太白了，感觉应该要柔和点，不然我写了一篇文章，眼睛都要瞎了。</p><p><em>先偷偷发布试试…</em></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h5 id=&quot;测试&quot;&gt;&lt;a href=&quot;#测试&quot; class=&quot;headerlink&quot; title=&quot;测试&quot;&gt;&lt;/a&gt;测试&lt;/h5&gt;&lt;p&gt;小心翼翼的写着这一篇文章，生怕有点错字还是啥的，毕竟目前功能比较少，没有提供修改，咦，不对，貌似内容能够修改，但是标题和标签就不能了。&lt;/p
+      
+    
+    </summary>
+    
+    
+      <category term="日志" scheme="http://hh-hb.com/tags/%E6%97%A5%E5%BF%97/"/>
+    
+      <category term="工具" scheme="http://hh-hb.com/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
+  
+</feed>
