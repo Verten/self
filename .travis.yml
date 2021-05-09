@@ -34,17 +34,19 @@ install:
 before_script:
 - git config --global user.name 'verten'
 - git config --global user.email '342054368@qq.com'
+- sed -i'' "s~https://github.com/verten/verten.github.io.git~https://${ACCESS_TOKEN}@github.com/verten/verten.github.io.git~" _config.yml
 # - git clone git://github.com/heroicyang/hexo-theme-modernist.git themes/modernist
 
 # Maybe add minification scripts here
 script:
 - hexo generate
+- hexo deploy
 
-after_success:
-- cd ./public
-- git init
-- git remote add -t master origin $DEPLOY_REPO
-- git add .          
-- git commit -m 'Site updated'    # Make a new commit for new version
-- git branch -m master
-- git push -q -u origin master  # Push silently so we don't leak information
+# after_success:
+# - cd ./public
+# - git init
+# - git remote add -t master origin $DEPLOY_REPO
+# - git add .          
+# - git commit -m 'Site updated'    # Make a new commit for new version
+# - git branch -m master
+# - git push -q -u origin master  # Push silently so we don't leak information
