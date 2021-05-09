@@ -70,8 +70,8 @@ theme: tranquilpeak
 ## Docs: http://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:Verten/self.git
-  branch: gh-pages
+  repo: git@github.com:Verten/verten.github.io.git
+  branch: master
 
 feed:
     type: atom
